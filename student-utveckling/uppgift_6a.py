@@ -1,25 +1,22 @@
 from calc import *
 
 
-def exec_program(code):
+def exec_program(code, variabletable = {}):
     if is_program(code):
         statements = program_statements(code)
         if is_statements(statements):
             for statement in statements:
-                check_type(statement)
+                check_type(statement, variabletable)
         else:
             print('else')
             raise SyntaxError("A statement couldn't be interpreted.")
     else:
         raise SyntaxError("Can't interpret as a calc program.")
 
-def check_type(statement):
-    # if is_assignment(statement):
-    #     print(statement[-1], '[-1]')
-    #     x = 'res'
-    #     y = statement[-1]
-    #     exec("%s = %d" % (x,1))
-    #     print(res)
+def check_type(statement, variabletable):
+    if is_assignment(statement):
+        eval_assignment(statement, variabletable)
+
 
     # if is_repetition(statement):
     #     print('repetition')
@@ -30,52 +27,111 @@ def check_type(statement):
     #             check_type(element[2])
     #         is_repetition(element)
 
-    if is_selection(statement):
-        if condition(selection_condition(statement)):
-            if len(statement) == 3:
-                check_type(statement[2])
-            else:
-                check_type(statement[2])
-                exec_program(['calc'] + statement[3:])
-        else:
-            exec_program(['calc'] + statement[3:])
+    elif is_selection(statement):
+        eval_condition(statement, variabletable)
 
     elif is_output(statement):
-        if is_binaryexpr(output_expression(statement)):
-            print(binary_expression(statement[-1]))
-        elif isinstance(statement[-1], int) :
-            print(statement[-1])
-        else:
-            raise SyntaxError('Invalid expression')
+        exec_output(statement, variabletable)
 
     # elif is_input(statement):
     #     statement[0] = input()
 
-    # elif is_binaryexpr(statement):
-    #     print(statement)
-    #     return binary_expression(statement)
-    else:
-        print('else')
+def eval_assignment(statement, variabletable):
 
-def condition(value):
-    if value[1] == '>':
-        return (value[0] > value[-1])
-    elif value[1] == '<':
-        return (value[0] < value[-1])
-    elif value[1] == '=':
-        return (value[0] == value[-1])
-    else:
-        raise SyntaxError("Not a valid CONDOPER")
+    expression = assignment_expression(statement)
+    variabel = assignment_variable(statement)
 
-def binary_expression(expression):
-    if expression[1] == '+':
-        return expression[0] + expression[2]
-    elif expression[1] == '-':
-        return expression[0] - expression[2]
-    elif expression[1] == '*':
-        return expression[0] * expression[2]
-    elif expression[1] == '/':
-        return expression[0] / expression[2]
+    if is_binaryexpr(expression):
+        expression = binary_expression(expression, variabletable)
+        variabletable[variabel] = expression
+        return variabletable
+    elif isinstance(expression, (int, float)):
+        variabletable[variabel] = expression
+        return variabletable
+    elif expression in variabletable:
+        variabletable[variabel] = variabletable[expression]
+        return variabletable
+    else:
+        raise SyntaxError('Invalid assignment.')
+
+def exec_output(statement, variabletable):
+
+    expression = output_expression(statement)
+
+    if is_binaryexpr(expression):
+        print(binary_expression(expression))
+    elif isinstance(expression, (int, float)):
+        print(expression)
+    elif expression in variabletable:
+        print(expression, ' = ', variabletable[expression])
+    else:
+        raise SyntaxError('Invalid expression.')
+
+
+def eval_condition(statement, variabletable):
+    if condition(selection_condition(statement), variabletable):
+        if len(statement) == 3:
+            check_type(statement[2], variabletable)
+        else:
+            check_type(statement[2], variabletable)
+            exec_program(['calc'] + statement[3:], variabletable)
+    else:
+        exec_program(['calc'] + statement[3:], variabletable)
+
+def condition(value, variabletable):
+    statement = value.copy()
+    if not isinstance(statement[0], (int, float)):
+        if isinstance(statement[0], list):
+            statement[0] = binary_expression(statement[0])
+        elif statement[0] in variabletable:
+            statement[0] = variabletable[statement[0]]
+        else:
+            raise SyntaxError("In condition.")
+
+    if not isinstance(statement[2], (int, float)):
+        if isinstance(statement[2], list):
+            statement[2] = binary_expression(statement[2])
+        elif statement[2] in variabletable:
+            statement[2] = variabletable[statement[2]]
+        else:
+            raise SyntaxError("In condition.")
+
+    if statement[1] == '>':
+        return (statement[0] > statement[-1])
+    elif statement[1] == '<':
+        return (statement[0] < statement[-1])
+    elif statement[1] == '=':
+        return (statement[0] == statement[-1])
+    else:
+        raise SyntaxError("Not a valid CONDOPER.")
+
+def binary_expression(expression, variabletable):
+    statement = expression.copy()
+
+    if not isinstance(statement[0], (int, float)):
+        if isinstance(statement[0], list):
+            statement[0] = binary_expression(statement[0])
+        elif statement[0] in variabletable:
+            statement[0] = variabletable[statement[0]]
+        else:
+            raise SyntaxError("In binary expression.")
+
+    if not isinstance(statement[2], (int, float)):
+        if isinstance(statement[2], list):
+            statement[2] = binary_expression(statement[2])
+        elif statement[2] in variabletable:
+            statement[2] = variabletable[statement[2]]
+        else:
+            raise SyntaxError("In binary expression.")
+
+    if statement[1] == '+':
+        return statement[0] + statement[2]
+    elif statement[1] == '-':
+        return statement[0] - statement[2]
+    elif statement[1] == '*':
+        return statement[0] * statement[2]
+    elif statement[1] == '/':
+        return statement[0] / statement[2]
 
 """The tests"""
 # calc1 = ['calc', ['print', 1]]
@@ -112,3 +168,17 @@ def binary_expression(expression):
 #
 # calc9 = ['calc']
 # exec_program(calc9)
+#
+# calc10 = ['calc', ['if', [[8, '+', 2], '<', 6], ['print', 2], ['print', 4]]]
+# """Tests if proram works if statement is True"""
+# exec_program(calc10)
+#
+# calc11 = ['calc', ['if', [[3, '+', 2], '<', 'a'], ['print', 2], ['print', 4]]]
+# """Tests if proram works if statement is True"""
+# exec_program(calc11, {'a': 5})
+calc12 = ['calc', ['set', 'x', 7],['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
+print(exec_program(calc12))
+
+
+# calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
+# new_table = exec_program(calc1)
