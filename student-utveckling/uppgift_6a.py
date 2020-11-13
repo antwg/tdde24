@@ -23,15 +23,28 @@ def check_type(statement, variabletable):
     if is_assignment(statement):
         eval_assignment(statement, variabletable)
 
+    elif is_repetition(statement):
+        condition_rep = repetition_condition(statement)
+        statement_rep = repetition_statements(statement)
+        if condition(condition_rep, variabletable):
+            for i in range(len(statement_rep)):
+                if is_input(statement_rep[i]):
+                    variabletable = exec_input(statement_rep[i], variabletable)
+                elif is_assignment(statement_rep[i]):
+                    variabeltable = eval_assignment(statement_rep[i], variabletable)
+                elif is_selection(statement_rep[i]):
+                    pass
+                elif is_output(statement_rep[i]):
+                    check_type(statement_rep[i], variabeltable)
+                else:
+                    raise SyntaxError('in repetion')
+            check_type(statement, variabletable)
 
-    # if is_repetition(statement):
-    #     print('repetition')
-    #     if is_true(repetition_condition(statement)):
-    #         print('true')
-    #         for element in statement[2:]:
-    #             print(element)
-    #             check_type(element[2])
-    #         is_repetition(element)
+
+
+
+            check_type(statement_rep, variabletable)
+            check_type(statement, variabletable)
 
     elif is_selection(statement):
         eval_condition(statement, variabletable)
@@ -53,7 +66,7 @@ def eval_assignment(statement, variabletable):
 
     expression = assignment_expression(statement)
     variabel = assignment_variable(statement)
-
+    
     if is_binaryexpr(expression):
         expression = binary_expression(expression, variabletable)
         variabletable[variabel] = expression
@@ -121,7 +134,6 @@ def condition(value, variabletable):
 
 def binary_expression(expression, variabletable):
     statement = expression.copy()
-    print(statement)
     if not isinstance(statement[0], (int, float)):
         if isinstance(statement[0], list):
             statement[0] = binary_expression(statement[0], variabletable)
@@ -138,7 +150,6 @@ def binary_expression(expression, variabletable):
         else:
             raise SyntaxError("In binary expression.")
 
-    print(statement[0], statement[2])
     if statement[1] == '+':
         return statement[0] + statement[2]
     elif statement[1] == '-':
@@ -195,6 +206,8 @@ def binary_expression(expression, variabletable):
 # print(exec_program(calc12))
 
 
-calc3 = ['calc', ['read', 'p1'],
-               ['print', 'p1']]
-exec_program(calc3, {'p0': 3})
+# calc3 = ['calc', ['read', 'p1'], ['print', 'p1']]
+# exec_program(calc3, {'p0': 3})
+
+calc2 = calc4 = ['calc', ['read', 'n'],['set', 'sum', 0], ['while', ['n', '>', 0], ['set', 'sum', ['sum', '+', 'n']], ['set', 'n', ['n', '-', 1]]], ['print', 'sum']]
+exec_program(calc2)
