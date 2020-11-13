@@ -1,14 +1,20 @@
 from calc import *
 
-
-def exec_program(code, variabletable = {}):
+#returnar inte nått värde
+def exec_program(code, input_table = {}):
     if is_program(code):
         statements = program_statements(code)
         if is_statements(statements):
+            variabletable = input_table.copy()
             for statement in statements:
-                check_type(statement, variabletable)
+                check = check_type(statement, variabletable)
+                if isinstance(check, dict):
+                    variabletable = (check)
+                else:
+                    check
+            return variabletable
+
         else:
-            print('else')
             raise SyntaxError("A statement couldn't be interpreted.")
     else:
         raise SyntaxError("Can't interpret as a calc program.")
@@ -31,10 +37,17 @@ def check_type(statement, variabletable):
         eval_condition(statement, variabletable)
 
     elif is_output(statement):
-        exec_output(statement, variabletable)
+        return exec_output(statement, variabletable)
 
-    # elif is_input(statement):
-    #     statement[0] = input()
+    elif is_input(statement):
+        return exec_input(statement, variabletable)
+
+
+def exec_input(statement, variabletable):
+    variabletable[input_variable(statement)] = int(input('Enter a value for '
+        + input_variable(statement) + ': '))
+    return variabletable
+
 
 def eval_assignment(statement, variabletable):
 
@@ -57,13 +70,14 @@ def eval_assignment(statement, variabletable):
 def exec_output(statement, variabletable):
 
     expression = output_expression(statement)
-
     if is_binaryexpr(expression):
         print(binary_expression(expression))
     elif isinstance(expression, (int, float)):
         print(expression)
     elif expression in variabletable:
         print(expression, ' = ', variabletable[expression])
+        return(expression, ' = ', variabletable[expression])
+        """Radbryt"""
     else:
         raise SyntaxError('Invalid expression.')
 
@@ -107,10 +121,10 @@ def condition(value, variabletable):
 
 def binary_expression(expression, variabletable):
     statement = expression.copy()
-
+    print(statement)
     if not isinstance(statement[0], (int, float)):
         if isinstance(statement[0], list):
-            statement[0] = binary_expression(statement[0])
+            statement[0] = binary_expression(statement[0], variabletable)
         elif statement[0] in variabletable:
             statement[0] = variabletable[statement[0]]
         else:
@@ -124,6 +138,7 @@ def binary_expression(expression, variabletable):
         else:
             raise SyntaxError("In binary expression.")
 
+    print(statement[0], statement[2])
     if statement[1] == '+':
         return statement[0] + statement[2]
     elif statement[1] == '-':
@@ -176,9 +191,10 @@ def binary_expression(expression, variabletable):
 # calc11 = ['calc', ['if', [[3, '+', 2], '<', 'a'], ['print', 2], ['print', 4]]]
 # """Tests if proram works if statement is True"""
 # exec_program(calc11, {'a': 5})
-calc12 = ['calc', ['set', 'x', 7],['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
-print(exec_program(calc12))
+# calc12 = ['calc', ['set', 'x', 7],['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
+# print(exec_program(calc12))
 
 
-# calc1 = ['calc', ['set', 'a', 5], ['print', 'a']]
-# new_table = exec_program(calc1)
+calc3 = ['calc', ['read', 'p1'],
+               ['print', 'p1']]
+exec_program(calc3, {'p0': 3})
