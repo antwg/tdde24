@@ -12,7 +12,11 @@ def exec_program(code, input_table = {}):
                     variabletable = (check)
                 else:
                     check
-            return variabletable
+
+            if input_table != variabletable:
+                return variabletable
+            else:
+                return input_table
 
         else:
             raise SyntaxError("A statement couldn't be interpreted.")
@@ -78,11 +82,11 @@ def exec_output(statement, variabletable):
 
     expression = output_expression(statement)
     if is_binaryexpr(expression):
-        print(binary_expression(expression))
+        print(binary_expression(expression), end='\n')
     elif isinstance(expression, (int, float)):
-        print(expression)
+        print(expression, end='\n')
     elif expression in variabletable:
-        print(expression, ' = ', variabletable[expression])
+        print(expression, ' = ', variabletable[expression], end='\n')
         return(expression, ' = ', variabletable[expression])
         """Radbryt"""
     else:
