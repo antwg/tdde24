@@ -121,7 +121,6 @@ def condition(value, variabletable):
 
 def binary_expression(expression, variabletable):
     statement = expression.copy()
-    print(statement)
     if not isinstance(statement[0], (int, float)):
         if isinstance(statement[0], list):
             statement[0] = binary_expression(statement[0], variabletable)
@@ -138,7 +137,6 @@ def binary_expression(expression, variabletable):
         else:
             raise SyntaxError("In binary expression.")
 
-    print(statement[0], statement[2])
     if statement[1] == '+':
         return statement[0] + statement[2]
     elif statement[1] == '-':
@@ -193,8 +191,3 @@ def binary_expression(expression, variabletable):
 # exec_program(calc11, {'a': 5})
 # calc12 = ['calc', ['set', 'x', 7],['set', 'y', 12], ['set', 'z', ['x', '+', 'y']], ['print', 'z']]
 # print(exec_program(calc12))
-
-
-calc3 = ['calc', ['read', 'p1'],
-               ['print', 'p1']]
-exec_program(calc3, {'p0': 3})
