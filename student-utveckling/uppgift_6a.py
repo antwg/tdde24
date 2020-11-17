@@ -5,47 +5,37 @@ def exec_program(code, input_table = {}):
     if is_program(code):
         statements = program_statements(code)
         if is_statements(statements):
+            #creates a copy of the input table so the function is not destructive
             variabletable = input_table.copy()
-            for statement in statements:
-                check = check_type(statement, variabletable)
-                if isinstance(check, dict):
-                    variabletable = (check)
-                else:
-                    check
+            variabletable = exec_statement(first_statement(statements), variabletable)
 
+            exec_program(['calc'] + rest_statements(statements), variabletable)
+
+
+            #if changes were made in the variable table return the new table
             if input_table != variabletable:
                 return variabletable
+
             else:
                 return input_table
 
         else:
             raise SyntaxError("A statement couldn't be interpreted.")
+
     else:
         raise SyntaxError("Can't interpret as a calc program.")
 
-def check_type(statement, variabletable):
+
+def exec_statement(statement, variabletable):
+    """Checks the type of a given statement"""
     if is_assignment(statement):
-        eval_assignment(statement, variabletable)
+        exec_assignment(statement, variabletable)
 
     elif is_repetition(statement):
-        condition_rep = repetition_condition(statement)
-        statement_rep = repetition_statements(statement)
-        if condition(condition_rep, variabletable):
-            for i in range(len(statement_rep)):
-                if is_input(statement_rep[i]):
-                    variabletable = exec_input(statement_rep[i], variabletable)
-                elif is_assignment(statement_rep[i]):
-                    variabeltable = eval_assignment(statement_rep[i], variabletable)
-                elif is_selection(statement_rep[i]):
-                    pass
-                elif is_output(statement_rep[i]):
-                    check_type(statement_rep[i], variabeltable)
-                else:
-                    raise SyntaxError('in repetion')
-            check_type(statement, variabletable)
+        exec_repetion(statement, variabletable)
 
     elif is_selection(statement):
-        eval_condition(statement, variabletable)
+        exec_condition(statement, variabletable)
 
     elif is_output(statement):
         return exec_output(statement, variabletable)
@@ -54,115 +44,124 @@ def check_type(statement, variabletable):
         return exec_input(statement, variabletable)
 
 
+def exec_expression(expression, variabeltable):
+    """Calculates and/or returns expression as integer/float."""
+    if is_binaryexpr(expression):
+        return binary_expression(expression, variabletable)
+
+    elif isinstance(expression, (int, float)):
+        return (expression, variabletable)
+
+    elif expression in variabletable:
+        return (variabletable[expression], variabletable)
+
+
 def exec_input(statement, variabletable):
+    """Assigns a value to a variable given by user input"""
+
     variabletable[input_variable(statement)] = int(input('Enter value for '
         + input_variable(statement) + ': '))
+
     return variabletable
 
 
-def eval_assignment(statement, variabletable):
+def exec_assignment(statement, variabletable):
+    """Assigns a value to a variable given by the program"""
+    expression = exec_expression(assignment_expression(statement), variabletable)
+    variable = assignment_variable(statement)
 
-    expression = assignment_expression(statement)
-    variabel = assignment_variable(statement)
+    variabletable[variable] = expression
 
-    if is_binaryexpr(expression):
-        expression = binary_expression(expression, variabletable)
-        variabletable[variabel] = expression
-        return variabletable
-    elif isinstance(expression, (int, float)):
-        variabletable[variabel] = expression
-        return variabletable
-    elif expression in variabletable:
-        variabletable[variabel] = variabletable[expression]
-        return variabletable
-    else:
-        raise SyntaxError('Invalid assignment.')
+    return variabletable
+
 
 def exec_output(statement, variabletable):
-    expression = output_expression(statement)
+    """Prints a given expression"""
+    expression = exec_expression(output_expression(statement), variabletable)
+
     print(expression)
-    if is_binaryexpr(expression):
-        print(binary_expression(expression), end='\n')
-    elif isinstance(expression, (int, float)):
-        print(expression, end='\n')
-    elif expression in variabletable:
-        print(expression, '=', variabletable[expression], end='\n')
 
 
-    else:
-        raise SyntaxError('Invalid expression.')
+def exec_condition(statement, variabletable):
+    """Checks if condition is met"""
+    condition_value = condition(selection_condition(statement), variabletable)
 
-def eval_condition(statement, variabletable):
-    if condition(selection_condition(statement), variabletable):
-        check_type(statement[2], variabletable)
-        # else:
-        #     check_type(statement[2], variabletable)
-        #     exec_program(['calc'] + statement[3:], variabletable)
-    elif not condition(selection_condition(statement), variabletable)\
-    and len(statement) >= 4:
-        check_type(statement[3], variabletable)
+    if condition_value:
+        exec_program(statement[2], variabletable)
 
-    elif not condition(selection_condition(statement), variabletable):
+    elif not condition_value and len(statement) >= 4:
+        exec_program(statement[3], variabletable)
+
+    elif not condition_value:
         pass
 
     else:
-        raise SyntaxError(statement)
+        raise SyntaxError("In exec condition: invalid condition")
+
 
 def condition(value, variabletable):
-    statement = value.copy()
-    if not isinstance(statement[0], (int, float)):
-        if isinstance(statement[0], list):
-            statement[0] = binary_expression(statement[0],variabletable)
-        elif statement[0] in variabletable:
-            statement[0] = variabletable[statement[0]]
-        else:
-            raise SyntaxError("In condition.")
-
-    if not isinstance(statement[2], (int, float)):
-        if isinstance(statement[2], list):
-            statement[2] = binary_expression(statement[2])
-        elif statement[2] in variabletable:
-            statement[2] = variabletable[statement[2]]
-        else:
-            raise SyntaxError("In condition.")
+    """Compares 2 expressions"""
+    left = exec_expression(statement[0], variabletable)
+    right = exec_expression(statement[2], variabletable)
 
     if statement[1] == '>':
-        return (statement[0] > statement[-1])
+        return left > right
     elif statement[1] == '<':
-        return (statement[0] < statement[-1])
+        return left < right
     elif statement[1] == '=':
-        return (statement[0] == statement[-1])
+        return left == right
     else:
         raise SyntaxError("Not a valid CONDOPER.")
 
-def binary_expression(expression, variabletable):
-    statement = expression.copy()
-    if not isinstance(statement[0], (int, float)):
-        if isinstance(statement[0], list):
-            statement[0] = binary_expression(statement[0], variabletable)
-        elif statement[0] in variabletable:
-            statement[0] = variabletable[statement[0]]
-        else:
-            raise SyntaxError("In binary expression.")
 
-    if not isinstance(statement[2], (int, float)):
-        if isinstance(statement[2], list):
-            statement[2] = binary_expression(statement[2])
-        elif statement[2] in variabletable:
-            statement[2] = variabletable[statement[2]]
-        else:
-            raise SyntaxError("In binary expression.")
+def binary_expression(expression, variabletable):
+    """Performs a chosen binary expression on 2 expresssions"""
+    # statement = expression.copy()
+    # if not isinstance(statement[0], (int, float)):
+    #     if isinstance(statement[0], list):
+    #         statement[0] = binary_expression(statement[0], variabletable)
+    #     elif statement[0] in variabletable:
+    #         statement[0] = variabletable[statement[0]]
+    #     else:
+    #         raise SyntaxError("In binary expression: The expression could not \
+    #         be interpreted")
+    #
+    # if not isinstance(statement[2], (int, float)):
+    #     if isinstance(statement[2], list):
+    #         statement[2] = binary_expression(statement[2])
+    #     elif statement[2] in variabletable:
+    #         statement[2] = variabletable[statement[2]]
+    #     else:
+    #         raise SyntaxError("In binary expression: The expression could not \
+    #         be interpreted")
+
+    left = exec_expression(binaryexpr_left, variabletable)
+    right = exec_expression(binaryexpr_right, variabletable)
 
     if statement[1] == '+':
-        return statement[0] + statement[2]
+        return left + right
     elif statement[1] == '-':
-        return statement[0] - statement[2]
+        return left - right
     elif statement[1] == '*':
-        return statement[0] * statement[2]
+        return left * right
     elif statement[1] == '/':
-        return statement[0] / statement[2]
+        return left / right
     else:
         raise SyntaxError('Not binary expression')
+
+
+def exec_repetion(statement, variabletable):
+    """Performs statement while condition is true"""
+    condition_rep = repetition_condition(statement)
+    statement_rep = repetition_statements(statement)
+
+    if condition(condition_rep, variabletable):
+
+        for i in range(len(statement_rep)):
+
+            exec_statement(statement_rep[i], variabletable)
+
+        exec_statement(statement, variabletable)
 
 """The tests"""
 
