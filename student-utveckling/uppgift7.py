@@ -1,6 +1,6 @@
 from books import db
 
-def match(seq, pattern):
+def match(seq, pattern) -> list:
     """
     Returns whether given sequence matches the given pattern.
     """
@@ -34,7 +34,7 @@ def match(seq, pattern):
         return False
 
 
-def search(pattern, database):
+def search(pattern, database) -> list:
     """Returns the matches of a given pattern in a given database."""
     result = []
     for book in database:
