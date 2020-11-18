@@ -2,21 +2,17 @@ from books import db
 
 def match(seq, pattern):
     """
-    Returns whether given sequence matches the given pattern
+    Returns whether given sequence matches the given pattern.
     """
-
     if not pattern:
-        # print('not pattern', not seq)
         return not seq
-    elif isinstance(pattern[0], list):
-        # print('list', pattern[0], '***', seq[0])
+    elif isinstance(pattern[0], list): # If both are lists, compare contents.
         if isinstance(seq[0], list):
             if match(seq[0], pattern[0]) and match(seq[1:], pattern[1:]):
                 return True
         else:
             return False
     elif pattern[0] == '--':
-        # print('--')
         if match(seq, pattern[1:]):
             return True
         elif not seq:
@@ -24,30 +20,36 @@ def match(seq, pattern):
         else:
             return match(seq[1:], pattern)
     elif not seq:
-        # print('not seq')
         return False
     elif pattern[0] == '&':
-        # print('&', seq[0])
         return match(seq[1:], pattern[1:])
     elif seq[0] == pattern[0]:
-        # print(seq[0], ' = ', seq[0])
         if len(seq) == 1:
-            # print('len1')
             return True
         else:
             return match(seq[1:], pattern[1:])
+    elif pattern == '--':
+        return True
     else:
-        # print('else')
         return False
 
 
 def search(pattern, database):
+    """Returns the matches of a given pattern in a given database."""
     result = []
     for book in database:
-        # print('book', book)
-        if match(book, pattern):
-            # print('match')
+        if (match(book[0], pattern[0])
+                and match(book[1], pattern[1])
+                and match(book[2], pattern[2])):
             result.append(book)
     return result
 
-# print(search([['författare', ['&', 'zelle']], ['titel', ['--', 'python', '--']], ['år', '&']], db))
+
+"""Tests"""
+
+test1 = search([['författare', ['&', 'zelle']],
+                ['titel', ['--', 'python', '--']], ['år', '&']], db)
+
+test2 = search(['--', ['år', 2042], '--'], db)
+
+test3 = search(['--', ['titel', ['&', '&']], '--'], db)
