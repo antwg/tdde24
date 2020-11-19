@@ -12,19 +12,17 @@ def exec_program(code, input_table = {}):
             variabletable = exec_statement(first_statement(statements), variabletable)
 
             if empty_statements(rest_statements(statements)):
-                if not input_table == variabletable:
+                if input_table != variabletable:
                     return variabletable
                 else:
-                    variabletable = None
                     return input_table
 
             variabletable = exec_program(['calc'] + rest_statements(statements), variabletable)
 
             #if changes were made in the variable table return the new table
-            if not input_table == variabletable:
+            if input_table != variabletable:
                 return variabletable
             else:
-                variabletable = None
                 return input_table
         else:
 
