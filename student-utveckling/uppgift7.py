@@ -36,8 +36,13 @@ def match(seq, pattern) -> list:
 
 def search(pattern, database) -> list:
     """Returns the matches of a given pattern in a given database."""
+    if not(isinstance(pattern, list) and len(pattern) == 3
+            and isinstance(database, list)):
+        raise TypeError('Invalid input')
     result = []
     for book in database:
+        if not len(book) == 3:
+            raise TypeError('Invalid format in database')
         if (match(book[0], pattern[0])
                 and match(book[1], pattern[1])
                 and match(book[2], pattern[2])):
@@ -53,3 +58,4 @@ test1 = search([['författare', ['&', 'zelle']],
 test2 = search(['--', ['år', 2042], '--'], db)
 
 test3 = search(['--', ['titel', ['&', '&']], '--'], db)
+print(test1)
