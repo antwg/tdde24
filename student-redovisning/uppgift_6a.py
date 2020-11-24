@@ -1,3 +1,5 @@
+Anton Wegeström antwe841
+
 from calc import *
 
 def exec_program(code, input_table = {}):
