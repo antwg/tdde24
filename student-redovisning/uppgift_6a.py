@@ -1,5 +1,5 @@
-Anton Wegeström antwe841
-Christopher Wåtz chrwa634
+#Anton Wegeström antwe841
+#Christopher Wåtz chrwa634
 
 from calc import *
 
