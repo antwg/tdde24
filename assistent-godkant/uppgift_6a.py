@@ -1,3 +1,6 @@
+#Anton Wegeström antwe841
+#Christopher Wåtz chrwa634
+
 from calc import *
 
 def exec_program(code, input_table = {}):
