@@ -46,23 +46,33 @@ def traverse(tree, inner_node_func, leaf_func, empty_tree_func):
 # print(traverse([[4, 5, 6], 7, [[],8, 9]], inner_node_fn, leaf_fn, empty_tree_fn))
 
 
-
-
-def contains_key(key, tree):
-    # print(tree)
+def contains_key(key: int, tree: list) -> bool:
     def inner_node_func(tree, left, right):
-
-        # print('node', tree, 'left', left, 'right', right, 'return',
-        # contains_key(left or right, tree), 'left or right', left or right)
-
         return left or right
 
     def leaf_func(tree):
-        # print('leaf', tree,  tree == key)
         return tree == key
 
     def empty_tree_func():
-        # print('false')
         return False
 
     return traverse(tree, inner_node_func, leaf_func, empty_tree_func)
+
+# print(contains_key(5, [5, 7, 9]))
+# print(contains_key(4, [5, 7, [[4, 5, 6], 9, 12]]))
+# print(contains_key(13, [5, 7, [[4, 5, 6], 9, 12]]))
+
+def tree_depth(tree):
+    def inner_node_func(tree, left, right):
+        return max(left, right) + 1
+
+    def leaf_func(tree):
+        return 1
+
+    def empty_tree_func():
+        return 0
+
+    return traverse(tree, inner_node_func, leaf_func, empty_tree_func)
+
+# print(tree_depth(3))
+# print(tree_depth(([1,2,[2,3,4]], 5, [[6,7,8], 9, [10,11,[13, 14, 15]]])))
