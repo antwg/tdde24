@@ -89,7 +89,7 @@ def save_calendars(filename: str) -> None:
     Saves all calendars to file. The data is wrapped in [*CALFILE3000*, ...]
     which is used as a tag for identifying calendar files.
     """
-    with open(filename, "w") as output:
+    with open(filename,"wb") as output:
         pickle.dump(["*CALFILE3000*", calendars], output)
 
 
