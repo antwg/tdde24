@@ -1,3 +1,6 @@
+#Christopher Wåtz chrwa634
+#Anton Wegeström antwe841
+
 from books import db
 
 def match(seq, pattern) -> list:
