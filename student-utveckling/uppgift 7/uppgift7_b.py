@@ -25,6 +25,7 @@ def is_inner_node(tree):
 
 def return_key(tree):
     return tree[1]
+
 #main fuction
 def traverse(tree, inner_node_func, leaf_func, empty_tree_func):
 
@@ -76,3 +77,19 @@ def tree_depth(tree):
 
 # print(tree_depth(3))
 # print(tree_depth(([1,2,[2,3,4]], 5, [[6,7,8], 9, [10,11,[13, 14, 15]]])))
+
+def tree_size(tree):
+    def inner_node_func(tree, left, right):
+        return left + right + 1
+
+    def leaf_func(tree):
+        return 1
+
+    def empty_tree_func():
+        return 0
+
+    return traverse(tree, inner_node_func, leaf_func, empty_tree_func)
+
+# print(tree_size([2, 7, []]))
+# print(tree_size([]))
+# print(tree_size([[1, 2, []], 4, [[], 5, 6]]))
