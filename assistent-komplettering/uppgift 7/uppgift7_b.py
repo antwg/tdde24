@@ -1,3 +1,6 @@
+#Christopher Wåtz chrwa634
+#Anton Wegeström antwe841
+
 #hjälpfuktioner från labb 4
 from tree import *
 
