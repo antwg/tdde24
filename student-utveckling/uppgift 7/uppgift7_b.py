@@ -48,7 +48,7 @@ def contains_key(key: int, tree: list) -> bool:
     """Checks if a tree contains a given key"""
     def inner_node_func(tree, left, right):
         """Returns true if left or right returns true, else false"""
-        return left or right
+        return tree == key or left or right
 
     def leaf_func(tree):
         """Returns true if leaf = key, else false"""
@@ -109,7 +109,7 @@ def test():
     assert test_3_traverse == 0
 
     #test for contains_key
-    test_key_1 = contains_key(5, [5, 7, 9])
+    test_key_1 = contains_key(7, [5, 7, 9])
     test_key_2 = contains_key(4, [5, 7, [[4, 5, 6], 9, 12]])
     test_key_3 = contains_key(13, [5, 7, [[4, 5, 6], 9, 12]])
 
@@ -135,6 +135,4 @@ def test():
     assert size_test_2 == 0
     assert size_test_3 == 5
 
-    print('the code passed the test')
-
-test()
+    print('The code passed the test')
