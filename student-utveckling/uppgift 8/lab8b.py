@@ -1,3 +1,5 @@
+from cal_abstraction import *
+
 # =========================================================================
 # Type definition
 # =========================================================================
@@ -13,20 +15,27 @@ TimeSpanSeq = NamedTuple(
 
 # Implement these functions!  Also determine if you need *additional* functions.
 
-def new_time_span_seq(time_span -> TimeSpan) -> TimeSpanSeq:
-    ensure_type(time_span, TimeSpan)
+def new_time_span_seq(time_span: TimeSpan = None) -> TimeSpanSeq:
+    
     if time_span is None:
-        time_span = None
+        time_span = []
+    
     else:
-        ensure_list_type(time_span)
+        ensure_type(time_span, TimeSpan)
+ 
     
     return TimeSpanSeq(time_span)
 
 
 def tss_is_empty(tss: TimeSpanSeq) -> bool:
-    """return true iff the given CalendarDay has no appointments."""
+    """return true if there is no timespan in the timespan seq"""
     ensure_type(tss, TimeSpanSeq)
-    return not tss.TimeSpan
+
+    if len(tss[0]) > 0:
+        return False
+    
+    else:
+        return True
 
 
 def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
@@ -46,12 +55,12 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
     return tss + new_time_span_seq(add_time_span(ts))
 
 
-def tss_iter_spans(tss):
-    pass
+# def tss_iter_spans(tss):
+#     pass
 
 
-def show_time_spans(tss):
-    pass
+# def show_time_spans(tss):
+#     pass
 
 
 # Keep only time spans that satisfy pred.
@@ -63,3 +72,13 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(span, result)
 
     return result
+
+
+a = new_time_span_seq()
+print(a)
+b = new_time_span_seq(new_time_span(new_time(new_hour(1), new_minute(45)), new_time(new_hour(3), new_minute(0))))
+print(b)
+print(tss_is_empty(a))
+print(tss_is_empty(b))
+span = new_time_span(new_time(new_hour(5), new_minute(45)), new_time(new_hour(6), new_minute(0)))
+print(tss_plus_span(a, span))
