@@ -1,6 +1,3 @@
-#Christopher Wåtz chrwa634
-#Anton Wegeström antwe841
-
 from books import db
 
 def match(seq, pattern) -> list:
@@ -44,42 +41,39 @@ def match(seq, pattern) -> list:
 
 def search(pattern, database) -> list:
     """Returns the matches of a given pattern in a given database."""
-    if not(isinstance(pattern, list) and len(pattern) == 3
-            and isinstance(database, list)):
-        raise TypeError('Invalid input')
     result = []
     for book in database:
-        if not len(book) == 3:
-            raise TypeError('Invalid format in database')
         if match(book, pattern):
             result.append(book)
     return result
 
 
-"""Tests"""
+def tests():
+    """Tests"""
+    test1 = search([['författare', ['&', 'zelle']],
+                    ['titel', ['--', 'python', '--']], ['år', '&']], db)
 
-test1 = search([['författare', ['&', 'zelle']],
-                ['titel', ['--', 'python', '--']], ['år', '&']], db)
+    assert test1 == [[['författare', ['john', 'zelle']], ['titel',
+    ['python', 'programming', 'an', 'introduction',
+    'to', 'computer', 'science']], ['år', 2010]],
+    [['författare', ['john', 'zelle']], ['titel',
+    ['data', 'structures', 'and', 'algorithms', 'using', 'python', 'and', 'c++']],
+    ['år', 2009]]]
 
-assert test1 == [[['författare', ['john', 'zelle']], ['titel',
-['python', 'programming', 'an', 'introduction',
-'to', 'computer', 'science']], ['år', 2010]],
-[['författare', ['john', 'zelle']], ['titel',
-['data', 'structures', 'and', 'algorithms', 'using', 'python', 'and', 'c++']],
-['år', 2009]]]
+    test2 = search(['--', ['år', 2042], '--'], db)
 
-test2 = search(['--', ['år', 2042], '--'], db)
+    assert test2 == []
 
-assert test2 == []
+    test3 = search(['--', ['titel', ['&', '&']], '--'], db)
 
-test3 = search(['--', ['titel', ['&', '&']], '--'], db)
+    assert test3 == [[['författare', ['armen', 'asratian']], ['titel',
+    ['diskret', 'matematik']], ['år', 2012]]]
 
-assert test3 == [[['författare', ['armen', 'asratian']], ['titel',
-['diskret', 'matematik']], ['år', 2012]]]
+    test4 = search([[], [], []], db)
+    assert test4 == []
+    # print(test4)
 
-test4 = search([[], [], []], db)
-assert test4 == []
-# print(test4)
+    test5 = search(['--', '--', '--'], db)
+    assert test5 == db
 
-test5 = search(['--', '--', '--'], db)
-assert test5 == db
+    print('Passed all tests')

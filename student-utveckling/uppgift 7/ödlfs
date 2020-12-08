@@ -1,3 +1,0 @@
-Help on function contains_key in module uppgift7_b:
-
-ccoonnttaaiinnss__kkeeyy(key: int, tree: list) -> bool
