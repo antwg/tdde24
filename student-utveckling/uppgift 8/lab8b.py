@@ -16,14 +16,14 @@ TimeSpanSeq = NamedTuple(
 # Implement these functions!  Also determine if you need *additional* functions.
 
 def new_time_span_seq(time_span: TimeSpan = None) -> TimeSpanSeq:
-    
+    """
+    Creates a new time span sequence. If no timespan are given then 
+    return a timespan sequence with an empty sequence
+    """
+
     if time_span is None:
         time_span = []
     
-    # elif isinstance(time_span, list):
-    #     for ts in time_span:
-    #         ensure_type(ts, TimeSpan)
-
     else:
         ensure_list_type(time_span, TimeSpan)
  
@@ -32,10 +32,10 @@ def new_time_span_seq(time_span: TimeSpan = None) -> TimeSpanSeq:
 
 
 def tss_is_empty(tss: TimeSpanSeq) -> bool:
-    """return true if there is no timespan in the timespan seq"""
+    """return true if timespanseq is empty"""
     ensure_type(tss, TimeSpanSeq)
 
-    return not tss.TimeSSpan
+    return not tss.TimeSpan
 
 
 def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
@@ -74,6 +74,7 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
 
 
 def tss_iter_spans(tss: TimeSpanSeq):
+    """iterates over a timespan sequence"""
     ensure_type(tss, TimeSpanSeq)
 
     for ts in tss.TimeSpan:
@@ -81,25 +82,22 @@ def tss_iter_spans(tss: TimeSpanSeq):
 
 
 def show_time_spans(tss: TimeSpanSeq) -> None:
+    """shows all the timespans in a timespan sequence"""
     ensure_type(tss, TimeSpanSeq)
     
-    def show_timespan(tss):
-        print('Timespan sequence:')
-        for ts in tss.TimeSpan:
+    for ts in tss.TimeSpan:
 
-            timespan = [hour_number(ts_start(ts).hour), minute_number(ts_start(ts).minute),
-            hour_number(ts_end(ts).hour), minute_number(ts_end(ts).minute)]
+        timespan = [hour_number(ts_start(ts).hour), minute_number(ts_start(ts).minute),
+        hour_number(ts_end(ts).hour), minute_number(ts_end(ts).minute)]
 
-            time= []
-            for elem in timespan:
-                if elem < 10:
-                    time.append('0' + str(elem))
-                else:
-                    time.append(str(elem))
-            
-            print(time[0], ':', time[1], ' - ', time[2], ':', time[3], sep='')
-
-    show_timespan(tss)
+        time= []
+        for elem in timespan:
+            if elem < 10:
+                time.append('0' + str(elem))
+            else:
+                time.append(str(elem))
+        
+        print(time[0], ':', time[1], ' - ', time[2], ':', time[3], sep='')
 
     # print(hour_number(ts_start(ts).hour),':', minute_number(ts_start(ts).minute),' - ',
     # hour_number(ts_end(ts).hour), ':', minute_number(ts_end(ts).minute), sep='')
@@ -114,38 +112,3 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(span, result)
 
     return result
-
-span1 = new_time_span(new_time(new_hour(3), new_minute(45)), new_time(new_hour(4), new_minute(0)))
-span2 = new_time_span(new_time(new_hour(5), new_minute(45)), new_time(new_hour(6), new_minute(0)))
-span3 = new_time_span(new_time(new_hour(2), new_minute(45)), new_time(new_hour(2), new_minute(55)))
-
-a = new_time_span_seq()
-b = new_time_span_seq([span2])
-
-# print(a)
-# print(b)
-
-# print(tss_is_empty(a))
-# print(tss_is_empty(b))
-
-print('done with first:')
-a = tss_plus_span(a, span1)
-print(a)
-
-print('done with second:')
-a = tss_plus_span(a, span2)
-print(a)
-print('done with third:')
-a = tss_plus_span(a, span3)
-print(a)
-
-show_time_spans(a)
-
-# print(tss_plus_span(b, span2))
-# print(tss_plus_span(c, span3))
-
-# print(tss_is_empty(b))
-# print(tss_is_empty(c))
-# print(tss_plus_span(a, span1))
-# print(tss_plus_span(b, span2))
-# print(tss_plus_span(c, span3))
