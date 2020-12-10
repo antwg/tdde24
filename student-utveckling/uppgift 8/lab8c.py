@@ -1,11 +1,5 @@
-# Write your code for lab 8C (remove) here.
+
 from cal_ui import *
-
-
-# create('anton')
-# book("anton", 20, "sep", "12:00", "14:00", "Rob train")
-# book("anton", 20, "sep", "15:00", "17:00", "Bomb train")
-# show('anton', 20, 'sep')
 
 
 def remove(cal_name: str, d: int, m: str, start_time: str):
@@ -36,6 +30,56 @@ def find_safe_appointments(cal_day: Day, time: Time) -> List:
     return safe_appointments
 
 
-# remove('anton', 20, 'sep', '12:00')
+def tests():
+    """Tests the functions"""
+    def test1():
+        """First test"""
+        create("Jayne")
+        book("Jayne", 20, "sep", "12:00", "14:00", "Rob train")
+        book("Jayne", 20, "sep", "15:00", "16:00", "Escape with loot")
+        show("Jayne", 20, "sep")
+        remove("Jayne", 20, "sep", "15:00")
+        book("Jayne", 20, "sep", "15:00", "16:00", "Return loot")
 
-# show('anton', 20, 'sep')
+        correct_cal = CalendarYear(months=[CalendarMonth
+        (month=Month(name='september'), days=[CalendarDay(day=Day(number=20),
+        appointments=[Appointment(span=TimeSpan(start=Time(hour=Hour(number=12),
+        minute=Minute(number=0)), end=Time(hour=Hour(number=14),
+        minute=Minute(number=0))), subject=Subject(text='Rob train')),
+        Appointment(span=TimeSpan(start=Time(hour=Hour(number=15),
+        minute=Minute(number=0)), end=Time(hour=Hour(number=16),
+        minute=Minute(number=0))), subject=Subject(text='Return loot'))])])])
+
+        assert get_calendar('Jayne') == correct_cal
+
+    def test2():
+        """First test"""
+        create("Carl")
+        book("Carl", 10, "sep", "12:00", "14:00", "Eat cookie")
+        book("Carl", 10, "sep", "15:00", "16:00", "Bake a cake")
+        show("Carl", 10, "sep")
+        remove("Carl", 10, "sep", "19:00")
+        book("Carl", 10, "sep", "19:00", "20:00", 'Build a sand castle')
+        book('Carl', 10, 'sep', '21:53', '21:54', 'Eat icecream')
+        remove('Carl', 10, 'sep', '19:00')
+
+
+        correct_cal2 = CalendarYear(months=[CalendarMonth(month=Month
+        (name='september'), days=[CalendarDay(day=Day(number=10),
+        appointments=[Appointment(span=TimeSpan(start=Time(hour=Hour(number=12),
+        minute=Minute(number=0)), end=Time(hour=Hour(number=14),
+        minute=Minute(number=0))), subject=Subject(text='Eat cookie')),
+        Appointment(span=TimeSpan(start=Time(hour=Hour(number=15),
+        minute=Minute(number=0)), end=Time(hour=Hour(number=16),
+        minute=Minute(number=0))), subject=Subject(text='Bake a cake')),
+        Appointment(span=TimeSpan(start=Time(hour=Hour(number=21),
+        minute=Minute(number=53)), end=Time(hour=Hour(number=21),
+        minute=Minute(number=54))), subject=Subject(text='Eat icecream'))])])])
+
+        assert get_calendar('Carl') == correct_cal2
+
+
+    test1()
+    test2()
+    print('Passed all tests')
+tests()
