@@ -136,3 +136,4 @@ def test():
     assert size_test_3 == 5
 
     print('The code passed the test')
+test()

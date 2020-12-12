@@ -77,3 +77,4 @@ def tests():
     assert test5 == db
 
     print('Passed all tests')
+tests()
