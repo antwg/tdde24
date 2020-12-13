@@ -53,7 +53,7 @@ def tests():
         assert get_calendar('Jayne') == correct_cal
 
     def test2():
-        """First test"""
+        """Second test"""
         create("Carl")
         book("Carl", 10, "sep", "12:00", "14:00", "Eat cookie")
         book("Carl", 10, "sep", "15:00", "16:00", "Bake a cake")
@@ -82,4 +82,3 @@ def tests():
     test1()
     test2()
     print('Passed all tests')
-tests()
