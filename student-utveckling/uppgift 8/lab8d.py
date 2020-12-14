@@ -1,5 +1,6 @@
 # Write your code for lab 8d here.
 from cal_abstraction import *
+from cal_ui import *
 from settings import CHECK_AGAINST_FACIT
 
 if CHECK_AGAINST_FACIT:
@@ -17,16 +18,20 @@ else:
 
 def last_ts_in_seq(time_span_seq:TimeSpanSeq) -> TimeSpan:
     """Returns the last TimeSpan in a TimeSpanSeq"""
+    print(time_span_seq)
     return time_span_seq.TimeSpan[-1]
 
 
-def show_free(cal_name: str, d: Int, m: Str, start_time: Str, end_time: Str):
+def show_free(cal_name: str, d: int, m: str, start_time: str, end_time: str):
     """Prints free timespans given a day and a start and end time."""
     start = new_time_from_string(start_time)
     end = new_time_from_string(end_time)
+    month = new_month(m)
+    day = new_day(d)
+
     cal_year = get_calendar(cal_name)
-    cal_month = cy_get_month(m, cal_year)
-    cal_day = cm_get_day(cal_month, d)
+    cal_month = cy_get_month(month, cal_year)
+    cal_day = cm_get_day(cal_month, day)
 
     show_time_spans(free_spans(cal_day, start, end))
 
@@ -40,8 +45,10 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
         return new_time_span_seq(new_time_span(start, end))
 
     else:  # Add all appointments to a TimeSpanSeq
-        for ts in cd_iter_appointments(cal_day):
-            tss_plus_span(time_span_seq, ts)
+        for app in cd_iter_appointments(cal_day):
+            print(app_span(app), 'app_span')
+            tss_plus_span(time_span_seq, app_span(app))
+            print(time_span_seq, 'tss')
 
         free_time = new_time_span_seq
         old_time_start = start
@@ -58,8 +65,8 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
                     old_time_start = ts_e
                 else:
                     old_time_start = ts_e
-
-        if time_precedes(time_end(last_ts_in_seq(time_span_seq)), end):
+        print(time_span_seq, 'test')
+        if time_precedes(ts_end(last_ts_in_seq(time_span_seq)), end):
             tss_plus_span(free_time, new_time_span(time_end(last_ts_in_seq(time_span_seq)), end))
 
         return free_time
