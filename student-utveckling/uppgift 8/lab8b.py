@@ -18,17 +18,17 @@ TimeSpanSeq = NamedTuple(
 
 def new_time_span_seq(time_span: TimeSpan = None) -> TimeSpanSeq:
     """
-    Creates a new time span sequence. If no timespan are given then 
+    Creates a new time span sequence. If no timespan are given then
     return a timespan sequence with an empty sequence
     """
 
     if time_span is None:
         time_span = []
-    
+
     else:
         ensure_list_type(time_span, TimeSpan)
- 
-    
+
+
     return TimeSpanSeq(time_span)
 
 
@@ -45,7 +45,7 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
     has been added in its proper position.
     """
 
-    ensure_type(ts, TimeSpan)   
+    ensure_type(ts, TimeSpan)
     ensure_type(tss, TimeSpanSeq)
 
     def add_ts(ts: TimeSpan, tss: TimeSpanSeq):
@@ -74,7 +74,6 @@ def show_time_spans(tss: TimeSpanSeq) -> None:
     for ts in tss_iter_spans(tss):
         show_ts(ts)
 
-
 # Keep only time spans that satisfy pred.
 # You do not need to modify this function.
 def tss_keep_spans(tss, pred):
@@ -84,16 +83,3 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(span, result)
 
     return result
-
-span1 = new_time_span(new_time(new_hour(10), new_minute(15)), new_time(new_hour(13), new_minute(30)))
-span2 = new_time_span(new_time_from_string("12:10"), new_time_from_string("15:45"))
-span3 = new_time_span(new_time(new_hour(18), new_minute(15)), new_time(new_hour(19), new_minute(30)))
-
-a = new_time_span_seq()
-b = new_time_span_seq([span1])
-
-a = tss_plus_span(a, span1)
-a = tss_plus_span(a, span2)
-a = tss_plus_span(a, span3)
-
-show_time_spans(a)

@@ -10,17 +10,20 @@
 #    None
 # =========================================================================
 
-# This module contains the definitions of the data types used by 
+# This module contains the definitions of the data types used by
 # the calendar, including both the actual type definitions
-# (usually using NamedTuple) and the low-level primitives that 
+# (usually using NamedTuple) and the low-level primitives that
 # are used for manipulating the associated data.
 
-# The module also contains a number of useful functions that are 
-# related to these datatypes, but that do not actually depend on 
-# how the datatypes are represented.  These should be clearly 
+# The module also contains a number of useful functions that are
+# related to these datatypes, but that do not actually depend on
+# how the datatypes are represented.  These should be clearly
 # separated in the code below.
 
-from typing import Type, NamedTuple, List, Callable, Set, Dict
+from typing import (
+        Type, NamedTuple, List, Callable, Set, Dict, Any,
+        get_origin, get_args
+)
 
 # =========================================================================
 #  1. Basic functions for ensuring correctness.
@@ -38,33 +41,49 @@ def ensure(val, pred) -> None:
 
 
 def ensure_type(val, some_type: Type) -> None:
-    """Assert that the given value is of the given type."""
-    assert isinstance(val, some_type), \
-        f"Value {val} is of type {type(val)}; expected type {some_type}."
-
-
-def ensure_dict_type(val, type_name: str) -> None:
     """
-    Assert that the given value is a dictionary with the given 'type_name' value.
-    This does not test the type of element values.  It is instead intended for
-    an alternative representation that does not use NamedTuples.  We can switch
-    to that representation in order to test that abstraction layers are used
-    correctly.
+        Assert that the given value is of the given type.
+
+        Only handles X, List[X], Dict[X, Y]. Where X and Y are types handled by
+        `ensure_type()` or are "simple" types.
+
+        Some examples of "simple" types are: str, int, float, bool.
     """
-    assert isinstance(val, dict), \
-        f"Value {val} is of type {type(val)}; expected type dict."
-    assert val.get('type_name', None) == type_name, \
-        f"Value {val} is a dictionary, " \
-        f"but does not have a key 'type_name' with value '{type_name}'."
+    origin = get_origin(some_type)
+    if origin is not None:
+        # This is a nested type.
+        assert type(val) is origin, f"Value {val} is of type {type(val)}; " \
+                                    f"expected type {some_type}."
+        args = get_args(some_type)
+        if args and origin is list:
+            element_type = args[0]
+            for x in val:
+                ensure_type(x, element_type)
+
+        elif args and origin is dict:
+            key_type, value_type = args
+            for x in val.keys():
+                ensure_type(x, key_type)
+
+            for x in val.values():
+                ensure_type(x, value_type)
+
+        else:
+            assert False, f"Cannot check the given type {some_type}"
+    elif some_type is not Any:
+        # 'Simple' type.
+        assert type(val) is some_type, f"Value {val} is of type {type(val)}; " \
+                                       f"expected type {some_type}."
 
 
-def ensure_list_type(val, some_type: Type) -> None:
-    """Assert that the given value is a list with elements of the given type."""
-    assert isinstance(val, list), \
-        f"Value {val} is of type {type(val)}; expected type list."
-    for element in val:
-        assert isinstance(element, some_type), \
-            f"Value {val} in list is of type {type(val)}; expected type {some_type}."
+def ensure_list_type(val, type_name: type) -> None:
+    """ Checks if `val` is a list with only elements of `type_name`. """
+    ensure_type(val, List[type_name])
+
+
+def ensure_dict_type(val, type_name: type) -> None:
+    """ Checks if `val` is a dict with only values of `type_name`. """
+    ensure_type(val, Dict[Any, type_name])
 
 
 # =========================================================================
@@ -263,18 +282,18 @@ else:
         elif not time_precedes(start, end):
             raise ValueError(f"Start time {start} must strictly precede the end time {end}.")
         else:
-            return TimeSpan(dict(type_name="TimeSpan", start=start, end=end))
+            return TimeSpan(dict(start=start, end=end))
 
 
     def ts_start(ts: TimeSpan) -> Time:
         """Return the start of a TimeSpan"""
-        ensure_dict_type(ts, "TimeSpan")
+        ensure_type(ts, TimeSpan)
         return ts["start"]
 
 
     def ts_end(ts: TimeSpan) -> Time:
         """Return the end of a TimeSpan"""
-        ensure_dict_type(ts, "TimeSpan")
+        ensure_type(ts, TimeSpan)
         return ts["end"]
 
 # ---- TimeSpan: Functionality independent of the representation ----
@@ -537,7 +556,7 @@ CalendarDay = NamedTuple(
 
 def new_calendar_day(day: Day, appointments: List[Appointment] = None) -> CalendarDay:
     """
-    Create and return a new CalendarDay for the given Day of the month, 
+    Create and return a new CalendarDay for the given Day of the month,
     with the given appointments.
     """
     ensure_type(day, Day)
@@ -547,7 +566,7 @@ def new_calendar_day(day: Day, appointments: List[Appointment] = None) -> Calend
         # a value, and if something empty is provided, we create a *new* list each time.
         appointments = []
     else:
-        ensure_list_type(appointments, Appointment)
+        ensure_type(appointments, List[Appointment])
     return CalendarDay(day, appointments)
 
 
@@ -580,7 +599,7 @@ def cd_is_empty(cal_day: CalendarDay) -> bool:
 def cd_plus_appointment(cal_day: CalendarDay, appointment: Appointment) -> CalendarDay:
     """
     Returns a copy of the given CalendarDay, where the given Appointment
-    has been added in its proper position. 
+    has been added in its proper position.
     """
     ensure_type(appointment, Appointment)
     ensure_type(cal_day, CalendarDay)
@@ -615,7 +634,7 @@ def cd_any_appointment_satisfies(
     Does any appointment during the given calendar day satisfy the
     given predicate?
     :param cal_day: A CalendarDay.
-    :param predicate: A function that takes a particular Appointment 
+    :param predicate: A function that takes a particular Appointment
     as parameter and returns true iff the Appointment satisfies some
     condition.
     """
@@ -655,7 +674,7 @@ def new_calendar_month(month: Month, days: List[CalendarDay] = None) -> Calendar
         # a value, and if something empty is provided, we create a *new* list each time.
         days = []
     else:
-        ensure_list_type(days, CalendarDay)
+        ensure_type(days, List[CalendarDay])
     return CalendarMonth(month, days)
 
 
@@ -686,9 +705,9 @@ def cm_is_empty(cal_mon: CalendarMonth) -> bool:
 def cm_plus_cd(cal_mon: CalendarMonth, cal_day: CalendarDay) -> CalendarMonth:
     """
     Returns a copy of the given CalendarMonth, where the given CalendarDay
-    has been added in its proper position.  If the CalendarMonth already 
+    has been added in its proper position.  If the CalendarMonth already
     contains a CalendarDay for the same Day, then the old CalendarDay is
-    replaced with the new CalendarDay. 
+    replaced with the new CalendarDay.
     """
     ensure_type(cal_day, CalendarDay)
     ensure_type(cal_mon, CalendarMonth)
@@ -769,7 +788,7 @@ def new_calendar_year(months: List[CalendarMonth] = None) -> CalendarYear:
         # creates a *new* list each time.
         months = []
     else:
-        ensure_list_type(months, CalendarMonth)
+        ensure_type(months, List[CalendarMonth])
     return CalendarYear(months or [])
 
 
@@ -796,9 +815,9 @@ def cy_is_empty(cal_year: CalendarYear) -> bool:
 def cy_plus_cm(cal_year: CalendarYear, cal_mon: CalendarMonth) -> CalendarYear:
     """
     Returns a copy of the given CalendarYear, where the given CalendarMonth
-    has been added in its proper position.  If the CalendarYear already 
+    has been added in its proper position.  If the CalendarYear already
     contains a CalendarMonth for the same Month, then the old CalendarMonth is
-    replaced with the new CalendarMonth. 
+    replaced with the new CalendarMonth.
     """
     ensure_type(cal_mon, CalendarMonth)
     ensure_type(cal_year, CalendarYear)
@@ -853,6 +872,47 @@ def cy_get_month(mon: Month, cal_year: CalendarYear) -> CalendarMonth:
 #  8. A few tests.
 # =========================================================================
 
+# ---- ensure_type: A few simple tests ----
+
+
+def test_ensure_type() -> None:
+    """
+    A few tests for ensure_type.
+    """
+    time1 = new_time_from_string("12:00")
+    time2 = new_time_from_string("12:30")
+    ensure_type(time1, Time)
+    ensure_type([time1, time2], List[Time])
+    ensure_type({"a": time1, "b": time2}, Dict[str, Time])
+    ensure_type({"a": {1:1}, "b": {2:2}}, Dict[str, Dict[int, int]])
+    ts = new_time_span(time1, time2)
+    ensure_type(ts, TimeSpan)
+    ensure_type([[ts]], List[List[TimeSpan]])
+    ensure_type(1, Any)
+    ensure_type([1, 2, "abc"], List[Any])
+
+    ensure_list_type([1, 2, 3], int)
+    ensure_list_type([1, 2, "abc"], Any)
+
+    ensure_dict_type({"a": {1:1}, "b": {2:2}}, Dict[int, int])
+    ensure_dict_type({"a": time1, "b": time2}, Time)
+
+    def ensure_fail(*args):
+        try:
+            ensure_type(*args)
+        except AssertionError:
+            return
+        assert False, f"ensure_type{args} should fail."
+
+    ensure_fail(1, str)
+    ensure_fail(1, List[Any])
+    ensure_fail([1], List[str])
+    ensure_fail([[[]], [1]], List[List[List[Any]]])
+    ensure_fail([1, 2, "str"], List[int])
+
+    print("ensure_type: All tests passed.")
+
+
 # ---- Time: A few simple tests ----
 
 
@@ -884,10 +944,14 @@ def test_timespan_duration() -> None:
     they help you see some of the problems with the current implementation of the
     other functions in lab8a.py.
     """
-    span1 = new_time_span(new_time(new_hour(10), new_minute(15)),
-                          new_time(new_hour(13), new_minute(30)))
+    time1 = new_time(new_hour(10), new_minute(15))
+    time2 = new_time(new_hour(13), new_minute(30))
+    span1 = new_time_span(time1, time2)
     span2 = new_time_span(new_time_from_string("12:10"),
                           new_time_from_string("15:45"))
+
+    assert time_equals(ts_start(span1), time1)
+    assert time_equals(ts_end(span1), time2)
 
     assert ts_equals(span1, span1)
     assert ts_overlap(span1, span2)
@@ -905,5 +969,6 @@ def test_timespan_duration() -> None:
 
 
 if __name__ == '__main__':
+    test_ensure_type()
     test_time()
-    test_timespan()
+    test_timespan_duration()
