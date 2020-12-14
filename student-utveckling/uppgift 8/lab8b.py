@@ -1,4 +1,5 @@
 from cal_abstraction import *
+from cal_output import *
 
 # =========================================================================
 # Type definition
@@ -47,30 +48,15 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
     ensure_type(ts, TimeSpan)   
     ensure_type(tss, TimeSpanSeq)
 
-    def take_out_the_timespan(tss):
-
-        if not tss.TimeSpan:
-            return []
-        
-        elif isinstance(tss.TimeSpan, list):
-            
-            return tss.TimeSpan
-        
+    def add_ts(ts: TimeSpan, tss: TimeSpanSeq):
+        if tss_is_empty(tss) or time_precedes(
+            ts_start(ts), ts_start(tss.TimeSpan[0])
+        ):
+            return [ts] + tss.TimeSpan 
         else:
-            return [tss.TimeSpan]
-
-    def add_time_span(timespan: TimeSpan):
-
-        if not timespan:
-            return []
-
-        else:
-            return [timespan]
-
-    time_span_added = add_time_span(ts) + take_out_the_timespan(tss)
-    time_span_added.sort(key=ts_start)
-
-    return new_time_span_seq(time_span_added)
+            return [tss.TimeSpan[0]] + add_ts(ts, new_time_span_seq(tss.TimeSpan[1:]))
+    
+    return new_time_span_seq(add_ts(ts, tss))
 
 
 def tss_iter_spans(tss: TimeSpanSeq):
@@ -85,22 +71,8 @@ def show_time_spans(tss: TimeSpanSeq) -> None:
     """shows all the timespans in a timespan sequence"""
     ensure_type(tss, TimeSpanSeq)
     
-    for ts in tss.TimeSpan:
-
-        timespan = [hour_number(ts_start(ts).hour), minute_number(ts_start(ts).minute),
-        hour_number(ts_end(ts).hour), minute_number(ts_end(ts).minute)]
-
-        time= []
-        for elem in timespan:
-            if elem < 10:
-                time.append('0' + str(elem))
-            else:
-                time.append(str(elem))
-        
-        print(time[0], ':', time[1], ' - ', time[2], ':', time[3], sep='')
-
-    # print(hour_number(ts_start(ts).hour),':', minute_number(ts_start(ts).minute),' - ',
-    # hour_number(ts_end(ts).hour), ':', minute_number(ts_end(ts).minute), sep='')
+    for ts in tss_iter_spans(tss):
+        show_ts(ts)
 
 
 # Keep only time spans that satisfy pred.
@@ -112,3 +84,16 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(span, result)
 
     return result
+
+span1 = new_time_span(new_time(new_hour(10), new_minute(15)), new_time(new_hour(13), new_minute(30)))
+span2 = new_time_span(new_time_from_string("12:10"), new_time_from_string("15:45"))
+span3 = new_time_span(new_time(new_hour(18), new_minute(15)), new_time(new_hour(19), new_minute(30)))
+
+a = new_time_span_seq()
+b = new_time_span_seq([span1])
+
+a = tss_plus_span(a, span1)
+a = tss_plus_span(a, span2)
+a = tss_plus_span(a, span3)
+
+show_time_spans(a)
