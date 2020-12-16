@@ -47,7 +47,6 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
 
     ensure_type(ts, TimeSpan)
     ensure_type(tss, TimeSpanSeq)
-
     def add_ts(ts: TimeSpan, tss: TimeSpanSeq):
         if tss_is_empty(tss) or time_precedes(
             ts_start(ts), ts_start(tss.TimeSpan[0])
@@ -73,6 +72,7 @@ def show_time_spans(tss: TimeSpanSeq) -> None:
     
     for ts in tss_iter_spans(tss):
         show_ts(ts)
+        print()
 
 # Keep only time spans that satisfy pred.
 # You do not need to modify this function.
@@ -83,3 +83,10 @@ def tss_keep_spans(tss, pred):
             result = tss_plus_span(span, result)
 
     return result
+
+# span1 = new_time_span(new_time(new_hour(1), new_minute(25)), new_time(new_hour(2), new_minute(25)))
+# span2 = new_time_span(new_time(new_hour(3), new_minute(25)), new_time(new_hour(4), new_minute(25)))
+
+# a = new_time_span_seq([span1])
+# a = tss_plus_span(a, span2)
+# show_time_spans(a)
