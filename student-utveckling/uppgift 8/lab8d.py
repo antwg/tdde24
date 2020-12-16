@@ -49,16 +49,17 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
         for ts in tss_iter_spans(time_span_seq):
             ts_s = ts_start(ts)
             ts_e = ts_end(ts)
-            if time_precedes(end, ts_s):  # TimeSpan after given end
-                break
 
-            elif time_precedes(ts_e, start):  # TimeSpan before given start
+            if time_precedes(ts_e, start):  # TimeSpan before given start
                 pass
-
+            
             else:
                 if not time_precedes_or_equals(ts_s, old_time_start):
-                    free_time = tss_plus_span(free_time, new_time_span(old_time_start, ts_s))
-                    old_time_start = ts_e
+                    if time_precedes_or_equals(ts_s, end):
+                        free_time = tss_plus_span(free_time, new_time_span(old_time_start, time_earliest(ts_s, end)))
+                        old_time_start = time_earliest(ts_e, end)
+                    elif end == old_time_start:
+                        pass
                 else:
                     old_time_start = ts_e
 

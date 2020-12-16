@@ -59,7 +59,29 @@ def create_tests_for_free_span() -> dict:
         booking_data=["07:53-09:32", "09:32-09:50", "13:33-18:27"],  # This day's appointments
         exp_result=["09:50-13:33", "18:27-21:30"],
     )
+
+    # test if timespans after intervall
+    store_test_case(
+        test_cases,
+        6,
+        start_str="07:15",  # Search interval starts
+        end_str="09:30",  # Search interva    l ends
+        booking_data=["09:32-09:50", "13:33-18:27"],  # This day's appointments
+        exp_result=["07:15-09:30"],
+    )
+
+    # #test if timespans before intervall
+    store_test_case(
+        test_cases,
+        7,
+        start_str="19:15",  # Search interval starts
+        end_str="20:30",  # Search interval ends
+        booking_data=["09:32-09:50", "13:33-18:27"],  # This day's appointments
+        exp_result=["19:15-20:30"],
+    )
     print("Test cases generated.")
+
+
 
     return test_cases
 
