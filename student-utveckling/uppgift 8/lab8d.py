@@ -20,7 +20,6 @@ else:
 
 def last_ts_in_seq(time_span_seq:TimeSpanSeq) -> TimeSpan:
     """Returns the last TimeSpan in a TimeSpanSeq"""
-    print(time_span_seq)
     return time_span_seq.TimeSpan[-1]
 
 
@@ -50,27 +49,44 @@ def free_spans(cal_day: CalendarDay, start: Time, end: Time) -> TimeSpanSeq:
             time_span_seq = tss_plus_span(time_span_seq, app_span(app))
 
         free_time = new_time_span_seq()
-        old_time_start = start
+        point = start
         for ts in tss_iter_spans(time_span_seq):
             ts_s = ts_start(ts)
             ts_e = ts_end(ts)
 
-            if time_precedes(ts_e, start):  # TimeSpan before given start
-                pass
-            
-            else:
-                if not time_precedes_or_equals(ts_s, old_time_start):
-                    if time_precedes_or_equals(ts_s, end):
-                        free_time = tss_plus_span(free_time, new_time_span(old_time_start, time_earliest(ts_s, end)))
-                        old_time_start = time_earliest(ts_e, end)
-                    elif end == old_time_start:
-                        pass
+            if time_precedes_or_equals(ts_s, point):
+                #Must be outsider the given intervall
+                if time_precedes(ts_e, point):
+                    pass
+                elif time_precedes_or_equals(end, ts_e):
+                    point = ts_e
+                    break
+                elif time_precedes_or_equals(point, ts_e):
+                    point = ts_e
                 else:
-                    old_time_start = ts_e
+                    pass #if we want to do something later
 
-        if time_precedes(ts_end(last_ts_in_seq(time_span_seq)), end):
-            free_time = tss_plus_span(free_time, new_time_span(ts_end(last_ts_in_seq(time_span_seq)), end))
+            elif time_precedes(point, ts_s):
+                if time_precedes_or_equals(end, ts_s):
+                    free_time = tss_plus_span(free_time, new_time_span(point, end))
+                    point = ts_e
+                    break
+                if time_precedes_or_equals(end, ts_e):
+                    free_time = tss_plus_span(free_time, new_time_span(point, ts_s))
+                    point = ts_e
+                    break
+                elif time_precedes(ts_e, end):
+                    free_time = tss_plus_span(free_time, new_time_span(point, ts_s))
+                    point = ts_e
+            
+            elif time_precedes(end, ts_s):
+                break
 
+            else:
+                pass
+        
+        if time_precedes(point, end):
+            free_time = tss_plus_span(free_time, new_time_span(point, end) )
 
         return free_time
 
