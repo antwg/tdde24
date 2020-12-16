@@ -1,5 +1,6 @@
 # Write your code for lab 8d here.
 from cal_abstraction import *
+from cal_ui import *
 from settings import CHECK_AGAINST_FACIT
 from cal_ui import *
 from lab8b import *
@@ -19,6 +20,7 @@ else:
 
 def last_ts_in_seq(time_span_seq:TimeSpanSeq) -> TimeSpan:
     """Returns the last TimeSpan in a TimeSpanSeq"""
+    print(time_span_seq)
     return time_span_seq.TimeSpan[-1]
 
 
@@ -26,6 +28,9 @@ def show_free(cal_name: str, d: int, m: str, start_time: str, end_time: str):
     """Prints free timespans given a day and a start and end time."""
     start = new_time_from_string(start_time)
     end = new_time_from_string(end_time)
+    month = new_month(m)
+    day = new_day(d)
+
     cal_year = get_calendar(cal_name)
     cal_month = cy_get_month(new_month(m), cal_year)
     cal_day = cm_get_day(cal_month, new_day(d))
