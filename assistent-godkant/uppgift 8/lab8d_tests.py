@@ -31,7 +31,7 @@ def create_tests_for_free_span() -> dict:
         booking_data=["07:00-21:00"],  # This day's appointments
         exp_result=[],
     )
-    
+
     #Test for no appointments
     store_test_case(
         test_cases,

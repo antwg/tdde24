@@ -55,10 +55,10 @@ def tss_plus_span(tss: TimeSpanSeq, ts: TimeSpan) -> TimeSpanSeq:
         if tss_is_empty(tss) or time_precedes(
             ts_start(ts), ts_start(tss.TimeSpan[0])
         ):
-            return [ts] + tss.TimeSpan 
+            return [ts] + tss.TimeSpan
         else:
             return [tss.TimeSpan[0]] + add_ts(ts, new_time_span_seq(tss.TimeSpan[1:]))
-    
+
     return new_time_span_seq(add_ts(ts, tss))
 
 
@@ -73,7 +73,7 @@ def tss_iter_spans(tss: TimeSpanSeq):
 def show_time_spans(tss: TimeSpanSeq) -> None:
     """shows all the timespans in a timespan sequence"""
     ensure_type(tss, TimeSpanSeq)
-    
+
     for ts in tss_iter_spans(tss):
         show_ts(ts)
         print()
